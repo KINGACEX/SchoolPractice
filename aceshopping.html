@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Animated Login & Sign Up</title>
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+    
+    body {
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #6a11cb, #2575fc);
+      overflow: hidden;
+    }
+    
+    /* Floating background circles */
+    .circle {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.15);
+      animation: float 8s infinite ease-in-out;
+    }
+    
+    .circle:nth-child(1) {
+      width: 200px;
+      height: 200px;
+      top: -50px;
+      left: -50px;
+    }
+    
+    .circle:nth-child(2) {
+      width: 150px;
+      height: 150px;
+      bottom: -40px;
+      right: -30px;
+      animation-delay: 2s;
+    }
+    
+    @keyframes float {
+      0% {
+        transform: translateY(0px);
+      }
+      
+      50% {
+        transform: translateY(20px);
+      }
+      
+      100% {
+        transform: translateY(0px);
+      }
+    }
+    
+    .container {
+      width: 350px;
+      background: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(12px);
+      padding: 30px;
+      border-radius: 25px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+      color: white;
+      position: relative;
+      overflow: hidden;
+      animation: pop 0.7s ease;
+    }
+    
+    @keyframes pop {
+      0% {
+        transform: scale(0.5);
+        opacity: 0;
+      }
+      
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+    
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    
+    .input-box {
+      margin: 15px 0;
+      position: relative;
+    }
+    
+    .input-box input {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      outline: none;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      font-size: 16px;
+      transition: 0.3s;
+    }
+    
+    .input-box input::placeholder {
+      color: #eee;
+    }
+    
+    .input-box input:focus {
+      transform: scale(1.03);
+      background: rgba(255, 255, 255, 0.3);
+    }
+    
+    button {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 12px;
+      background: white;
+      color: #2575fc;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    
+    button:hover {
+      transform: scale(1.05);
+      background: #f1f1f1;
+    }
+    
+    .switch {
+      text-align: center;
+      margin-top: 15px;
+    }
+    
+    .switch span {
+      color: #fff;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    
+    .message {
+      text-align: center;
+      margin-top: 15px;
+      font-size: 14px;
+      color: #fff;
+    }
+    
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+  
+  <div class="circle"></div>
+  <div class="circle"></div>
+  
+  <div class="container">
+    
+    <!-- Login Form -->
+    <div id="loginForm">
+      <h2>Login</h2>
+      
+      <div class="input-box">
+        <input type="text" id="loginUser" placeholder="Username">
+      </div>
+      
+      <div class="input-box">
+        <input type="password" id="loginPass" placeholder="Password">
+      </div>
+      
+      <button onclick="login()">Login</button>
+      
+      <div class="switch">
+        Don't have an account?
+        <span onclick="showSignup()">Sign Up</span>
+      </div>
+      
+      <div class="message" id="loginMessage"></div>
+    </div>
+    
+    <!-- Signup Form -->
+    <div id="signupForm" class="hidden">
+      <h2>Sign Up</h2>
+      
+      <div class="input-box">
+        <input type="text" id="signupUser" placeholder="Username">
+      </div>
+      
+      <div class="input-box">
+        <input type="password" id="signupPass" placeholder="Password">
+      </div>
+      
+      <button onclick="signup()">Create Account</button>
+      
+      <div class="switch">
+        Already have an account?
+        <span onclick="showLogin()">Login</span>
+      </div>
+      
+      <div class="message" id="signupMessage"></div>
+    </div>
+    
+  </div>
+  
+  <script>
+    // Switch forms
+    function showSignup() {
+      document.getElementById("loginForm").classList.add("hidden");
+      document.getElementById("signupForm").classList.remove("hidden");
+    }
+    
+    function showLogin() {
+      document.getElementById("signupForm").classList.add("hidden");
+      document.getElementById("loginForm").classList.remove("hidden");
+    }
+    
+    // Sign Up
+    function signup() {
+      let user = document.getElementById("signupUser").value;
+      let pass = document.getElementById("signupPass").value;
+      
+      if (user === "" || pass === "") {
+        document.getElementById("signupMessage").innerText = "Fill all fields!";
+        return;
+      }
+      
+      localStorage.setItem("username", user);
+      localStorage.setItem("password", pass);
+      
+      document.getElementById("signupMessage").innerText = "Account Created!";
+    }
+    
+    // Login
+    function login() {
+      let user = document.getElementById("loginUser").value;
+      let pass = document.getElementById("loginPass").value;
+      
+      let savedUser = localStorage.getItem("username");
+      let savedPass = localStorage.getItem("password");
+      
+      if (user === savedUser && pass === savedPass) {
+        document.getElementById("loginMessage").innerText = "Login Successful 🎉";
+      } else {
+        document.getElementById("loginMessage").innerText = "Wrong Username or Password";
+      }
+    }
+  </script>
+  
+</body>
+
+</html>
