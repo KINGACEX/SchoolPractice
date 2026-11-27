@@ -1,4 +1,4 @@
-import { Theme } from './settings/types';
+type Theme = 'light' | 'dark';
 import { NSMQTrainingApp } from './components/generated/NSMQTrainingApp';
 
 let theme: Theme = 'light';
