@@ -233,13 +233,13 @@ export const NSMQTrainingApp = () => {
   const [history, setHistory] = useState<any[]>(() => activeProfile?.history || []);
   const [newProfileName, setNewProfileName] = useState("");
   const [page, setPage] = useState("Home"),
-  const [speechVoices, setSpeechVoices] = useState<Array<{name:string;lang:string;localService:boolean;engineIndex:number}>>([]), [speechVoice, setSpeechVoice] = useState(-1), [speechRate, setSpeechRate] = useState(1), [speechReady, setSpeechReady] = useState(false);
     [round, setRound] = useState<Round>("Fundamentals"),
     [subject, setSubject] = useState("All subjects"),
     [level, setLevel] = useState("All levels"),
     [qty, setQty] = useState(8),
     [limit, setLimit] = useState(20),
     [style, setStyle] = useState("Team rotation");
+  const [speechVoices, setSpeechVoices] = useState<Array<{name:string;lang:string;localService:boolean;engineIndex:number}>>([]), [speechVoice, setSpeechVoice] = useState(-1), [speechRate, setSpeechRate] = useState(1), [speechReady, setSpeechReady] = useState(false);
   const [session, setSession] = useState<Q[]>([]),
     [pos, setPos] = useState(0),
     [answer, setAnswer] = useState(""),
