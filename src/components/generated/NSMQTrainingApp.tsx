@@ -222,7 +222,15 @@ export const NSMQTrainingApp = () => {
     name: "Reserve",
     role: "Reserve"
   }]));
-  const [history, setHistory] = useState<any[]>(() => load("qf_history", []));
+  const [profiles, setProfiles] = useState<any[]>(() => {
+    const saved = load<any[]>("qf_profiles", []);
+    if (saved.length) return saved;
+    return [{ id: "default", name: "Student 1", history: load<any[]>("qf_history", []) }];
+  });
+  const [activeProfileId, setActiveProfileId] = useState(() => load<string>("qf_active_profile", "default"));
+  const activeProfile = profiles.find(p => p.id === activeProfileId) || profiles[0];
+  const [history, setHistory] = useState<any[]>(() => activeProfile?.history || []);
+  const [newProfileName, setNewProfileName] = useState("");
   const [page, setPage] = useState("Home"),
     [round, setRound] = useState<Round>("Fundamentals"),
     [subject, setSubject] = useState("All subjects"),
@@ -264,8 +272,13 @@ export const NSMQTrainingApp = () => {
     localStorage.setItem("qf_members", JSON.stringify(members));
   }, [members]);
   useEffect(() => {
+    setProfiles(current => current.map(p => p.id === activeProfileId ? { ...p, history } : p));
     localStorage.setItem("qf_history", JSON.stringify(history));
-  }, [history]);
+  }, [history, activeProfileId]);
+  useEffect(() => {
+    localStorage.setItem("qf_profiles", JSON.stringify(profiles));
+    localStorage.setItem("qf_active_profile", JSON.stringify(activeProfileId));
+  }, [profiles, activeProfileId]);
   const q = session[pos],
     attempts = history.length,
     correct = history.filter(x => x.ok).length,
@@ -393,13 +406,42 @@ export const NSMQTrainingApp = () => {
     }));
     setToast("Question added.");
   };
-  const nav = ["Home", "Train", "Mental Math", "Team room", "Performance", "Question bank"];
+  const switchProfile = (id: string) => {
+    if (id === activeProfileId) return;
+    const next = profiles.find(p => p.id === id);
+    if (!next) return;
+    setProfiles(current => current.map(p => p.id === activeProfileId ? { ...p, history } : p));
+    setActiveProfileId(id);
+    setHistory(next.history || []);
+    setPage("Home");
+    setSession([]);
+    setDone(false);
+    setRevealed(false);
+    setToast("Switched to " + next.name + ". Your personal progress is loaded.");
+  };
+  const createProfile = () => {
+    const name = newProfileName.trim();
+    if (!name) { setToast("Enter a profile name first."); return; }
+    if (profiles.some(p => p.name.toLowerCase() === name.toLowerCase())) { setToast("That profile name already exists."); return; }
+    const profile = { id: uid(), name, history: [] };
+    setProfiles(current => [...current.map(p => p.id === activeProfileId ? { ...p, history } : p), profile]);
+    setActiveProfileId(profile.id);
+    setHistory([]);
+    setNewProfileName("");
+    setPage("Home");
+    setSession([]);
+    setDone(false);
+    setRevealed(false);
+    setToast("Profile created. Your progress starts separately.");
+  };
+  const nav = ["Home", "Train", "Mental Math", "Team room", "Performance", "Question bank", "Profiles"];
   const card = "rounded-2xl border border-white/10 bg-white/[.04] p-5";
   const btn = "rounded-xl bg-cyan-300 px-5 py-3 font-bold text-slate-950 hover:bg-cyan-200";
   return <div className="min-h-screen bg-[#080d18] text-slate-100"><div className="mx-auto flex min-h-screen max-w-[1440px]">
- <aside className="hidden w-60 shrink-0 border-r border-white/10 bg-slate-950/70 p-5 lg:flex lg:flex-col"><div className="mb-9 flex items-center gap-3"><div className="grid h-11 w-11 place-items-center rounded-2xl bg-cyan-300 text-xl font-black text-slate-950">Q</div><div><b>QUIZFORGE</b><div className="text-[10px] uppercase tracking-widest text-cyan-300">JUABEN SHS · NSMQ LAB</div></div></div><div className="mb-3 text-[10px] font-bold uppercase tracking-widest text-slate-500">Workspace</div>{nav.map((n, i) => <button key={n} onClick={() => setPage(n)} className={"mb-1 rounded-xl px-3 py-3 text-left text-sm " + (page === n ? "bg-cyan-300/10 text-cyan-200" : "text-slate-400 hover:bg-white/5")}>{["⌂", "ϟ", "∑", "♟", "▥", "▤"][i]}　{n}</button>)}<div className="mt-auto rounded-xl bg-cyan-300/5 p-4 text-xs leading-5 text-slate-400"><b className="text-cyan-200">TRAIN WITH PURPOSE</b><p className="mt-2">Short drills. Honest feedback. Better team decisions.</p></div></aside>
- <main className="min-w-0 flex-1 px-4 pb-24 pt-5 sm:px-7 lg:px-9 lg:pb-10"><header className="mb-7 flex flex-wrap items-center justify-between gap-3"><div><div className="text-xs font-bold uppercase tracking-widest text-cyan-300">Juaben Senior High School / Ghana</div><div className="mt-1 text-[10px] font-semibold uppercase tracking-widest text-slate-500">Made by King Ace Himself</div><h1 className="mt-1 text-2xl font-black sm:text-3xl">{page === "Home" ? "Your training dashboard" : page}</h1><p className="mt-1 text-sm text-slate-400">{team} · Independent team practice</p></div><span className="rounded-full border border-emerald-300/20 bg-emerald-300/10 px-3 py-2 text-xs text-emerald-200">● Saved on this device</span></header>
+ <aside className="hidden w-60 shrink-0 border-r border-white/10 bg-slate-950/70 p-5 lg:flex lg:flex-col"><div className="mb-9 flex items-center gap-3"><div className="grid h-11 w-11 place-items-center rounded-2xl bg-cyan-300 text-xl font-black text-slate-950">Q</div><div><b>QUIZFORGE</b><div className="text-[10px] uppercase tracking-widest text-cyan-300">JUABEN SHS · NSMQ LAB</div></div></div><div className="mb-3 text-[10px] font-bold uppercase tracking-widest text-slate-500">Workspace</div>{nav.map((n, i) => <button key={n} onClick={() => setPage(n)} className={"mb-1 rounded-xl px-3 py-3 text-left text-sm " + (page === n ? "bg-cyan-300/10 text-cyan-200" : "text-slate-400 hover:bg-white/5")}>{["⌂", "ϟ", "∑", "♟", "▥", "▤", "👤"][i]}　{n}</button>)}<div className="mt-auto rounded-xl bg-cyan-300/5 p-4 text-xs leading-5 text-slate-400"><b className="text-cyan-200">TRAIN WITH PURPOSE</b><p className="mt-2">Short drills. Honest feedback. Better team decisions.</p></div></aside>
+ <main className="min-w-0 flex-1 px-4 pb-24 pt-5 sm:px-7 lg:px-9 lg:pb-10"><header className="mb-7 flex flex-wrap items-center justify-between gap-3"><div><div className="text-xs font-bold uppercase tracking-widest text-cyan-300">Juaben Senior High School / Ghana</div><div className="mt-1 text-[10px] font-semibold uppercase tracking-widest text-slate-500">Made by King Ace Himself</div><h1 className="mt-1 text-2xl font-black sm:text-3xl">{page === "Home" ? "Your training dashboard" : page}</h1><p className="mt-1 text-sm text-slate-400">{team} · Independent team practice</p><button onClick={() => setPage("Profiles")} className="mt-2 rounded-lg border border-cyan-300/30 bg-cyan-300/10 px-3 py-1.5 text-xs font-bold text-cyan-200">👤 {activeProfile?.name || "Student"} · Switch profile</button></div><span className="rounded-full border border-emerald-300/20 bg-emerald-300/10 px-3 py-2 text-xs text-emerald-200">● Saved on this device</span></header>
  {toast && <div className="mb-4 flex justify-between rounded-xl border border-cyan-300/20 bg-cyan-300/10 p-3 text-sm text-cyan-100">{toast}<button onClick={() => setToast("")}>×</button></div>}
+ {page === "Profiles" && <div className="space-y-5"><section className={card}><div className="text-xs font-bold uppercase tracking-widest text-cyan-300">Personal learning spaces</div><h2 className="mt-2 text-2xl font-black">Choose your profile</h2><p className="mt-2 text-sm leading-6 text-slate-400">Each student gets a separate practice history, accuracy record, XP level and achievement progress. The school question bank and team setup remain shared on this device.</p><div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">{profiles.map(p => { const active = p.id === activeProfileId; const count = (p.history || []).length; const wins = (p.history || []).filter((x:any) => x.ok).length; return <div key={p.id} className={"rounded-2xl border p-4 " + (active ? "border-cyan-300/40 bg-cyan-300/10" : "border-white/10 bg-slate-950/50")}><div className="flex items-center justify-between"><span className="grid h-10 w-10 place-items-center rounded-xl bg-cyan-300/10 text-xl">👤</span>{active && <span className="text-[10px] font-bold uppercase tracking-widest text-cyan-200">Active</span>}</div><h3 className="mt-3 text-lg font-bold">{p.name}</h3><p className="mt-1 text-xs text-slate-400">{count} attempts · {wins} correct</p><button onClick={() => switchProfile(p.id)} disabled={active} className={"mt-4 w-full rounded-xl px-3 py-2 text-sm font-bold " + (active ? "bg-white/5 text-slate-500" : "bg-cyan-300 text-slate-950")}>{active ? "Currently selected" : "Switch to profile"}</button></div>; })}</div></section><section className={card}><h3 className="text-lg font-bold">Create a student profile</h3><p className="mt-1 text-xs text-slate-400">Use a first name, nickname or team alias. Do not enter passwords or sensitive personal information.</p><div className="mt-4 flex flex-col gap-2 sm:flex-row"><input value={newProfileName} onChange={e => setNewProfileName(e.target.value)} maxLength={30} placeholder="Enter profile name" className="min-w-0 flex-1 rounded-xl border border-white/10 bg-slate-950 px-4 py-3 text-sm text-white outline-none focus:border-cyan-300" /><button onClick={createProfile} className={btn}>Create profile</button></div></section><div className="rounded-xl border border-amber-300/20 bg-amber-300/5 p-4 text-xs leading-5 text-amber-100/80"><b>Shared-device privacy note:</b> Profiles separate app progress, but they are not password-protected accounts. Anyone using this device may be able to switch profiles and view their records. Data stays in this app on this device; clearing app storage can erase it. Export/backup and secure sign-in can be considered for a future version.</div></div>}
  {page === "Home" && <div className="space-y-5"><section className="rounded-3xl border border-cyan-300/20 bg-gradient-to-br from-[#10283b] to-[#21183e] p-6 sm:p-9"><div className="text-xs font-bold uppercase tracking-widest text-cyan-200">Today's team challenge</div><h2 className="mt-3 text-3xl font-black sm:text-4xl">Think faster.<br /><span className="text-cyan-300">Reason deeper.</span></h2><p className="mt-3 max-w-xl text-sm leading-6 text-slate-300">Practise all five NSMQ round styles, rotate team turns and learn from every answer.</p><button onClick={() => setPage("Train")} className={"mt-6 " + btn}>Set up a drill →</button></section>
  <section className="grid grid-cols-2 gap-3 xl:grid-cols-4">{[{
               l: "Team accuracy",
@@ -526,5 +568,5 @@ export const NSMQTrainingApp = () => {
                   [x.k]: e.target.value
                 }))} className="mt-1 w-full rounded-xl border border-white/10 bg-slate-900 p-3 text-sm text-white" />}</label>)}<button onClick={addQuestion} className={"w-full " + btn}>Add to question bank</button></div></section><section className={card}><div className="flex flex-wrap items-center justify-between gap-3"><div><h2 className="font-bold">Question bank</h2><p className="mt-1 text-xs text-slate-500">{bank.length} questions · locally saved</p></div><div className="flex gap-2"><button onClick={exportBank} className="rounded-lg border border-white/10 px-3 py-2 text-xs">Export JSON</button><label className="cursor-pointer rounded-lg border border-white/10 px-3 py-2 text-xs">Import JSON<input type="file" accept="application/json" className="hidden" onChange={e => importBank(e.target.files?.[0])} /></label></div></div><div className="mt-4 space-y-2">{bank.map(x => <details key={x.id} className="rounded-xl bg-slate-900 p-3"><summary className="cursor-pointer"><div className="text-xs font-bold text-cyan-200">{x.subject} · {x.topic} · {x.round}</div><div className="mt-1 text-sm font-semibold">{x.prompt}</div></summary><div className="mt-3 border-t border-white/10 pt-3 text-xs leading-5 text-slate-400"><b className="text-slate-200">Answer: {x.answer}</b><p className="mt-1">{x.explanation}</p><p className="mt-2 text-[10px] text-slate-600">{x.source}</p><button onClick={() => setBank(v => v.filter(q => q.id !== x.id))} className="mt-2 text-rose-300">Remove</button></div></details>)}</div></section></div>}
  <footer className="mt-10 border-t border-white/10 pt-5 text-[10px] leading-5 text-slate-600"><div className="mb-2 font-bold uppercase tracking-widest text-cyan-300">Made by King Ace Himself</div>Independent practice prototype; not affiliated with Primetime or the official NSMQ. Seed questions are original demonstration items, not official past questions. Have a teacher verify academic content before competition use. Data is stored in this browser on this device.</footer></main>
- <nav className="fixed bottom-0 left-0 right-0 z-20 flex justify-around border-t border-white/10 bg-[#080d18]/95 px-1 py-2 backdrop-blur lg:hidden">{nav.map((n, i) => <button key={n} onClick={() => setPage(n)} className={"flex flex-col items-center gap-1 px-2 py-1 text-[10px] " + (page === n ? "text-cyan-200" : "text-slate-500")}><span className="text-lg">{["◈", "ϟ", "♟", "▥", "▤"][i]}</span><span>{["Home", "Train", "Math", "Team", "Stats", "Bank"][i]}</span></button>)}</nav></div></div>;
+ <nav className="fixed bottom-0 left-0 right-0 z-20 flex justify-around border-t border-white/10 bg-[#080d18]/95 px-1 py-2 backdrop-blur lg:hidden">{nav.map((n, i) => <button key={n} onClick={() => setPage(n)} className={"flex flex-col items-center gap-1 px-2 py-1 text-[10px] " + (page === n ? "text-cyan-200" : "text-slate-500")}><span className="text-lg">{["◈", "ϟ", "♟", "▥", "▤"][i]}</span><span>{["Home", "Train", "Math", "Team", "Stats", "Bank", "Profiles"][i]}</span></button>)}</nav></div></div>;
 };
