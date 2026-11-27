@@ -51,7 +51,7 @@ jobs:
               crest = src.copy()
               crest.thumbnail((int(size*0.72), int(size*0.72)), Image.Resampling.LANCZOS)
               canvas.alpha_composite(crest, ((size-crest.width)//2, (size-crest.height)//2))
-              out = Path(f"android/app/src/main/res/mipmap-{density}-v4")
+              out = Path(f"android/app/src/main/res/mipmap-{density}")
               out.mkdir(parents=True, exist_ok=True)
               canvas.save(out / "ic_launcher.png", optimize=True)
               canvas.save(out / "ic_launcher_round.png", optimize=True)
