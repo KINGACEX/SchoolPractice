@@ -1,0 +1,1 @@
+import type { CapacitorConfig } from '@capacitor/cli';\nconst config: CapacitorConfig = { appId:'gh.edu.juaben.quizforge', appName:'Juaben QUIZFORGE', webDir:'dist', android:{allowMixedContent:false} };\nexport default config;
