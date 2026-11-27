@@ -27,10 +27,42 @@ jobs:
           ${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager --install "platform-tools" "platforms;android-35" "build-tools;35.0.0"
       - name: Install dependencies
         run: npm install
+      - name: Download JUASS and Unsplash visual assets
+        run: |
+          mkdir -p public/images
+          curl -fL --retry 3 "https://www.juass.online/assets/images/logo2.png" -o public/juass-crest.png
+          curl -fL --retry 3 "https://images.unsplash.com/photo-1776468466955-bbb8fe788502?auto=format&fit=crop&w=1440&q=78" -o public/images/physics-atom.jpg
+          curl -fL --retry 3 "https://images.unsplash.com/photo-1773984203485-8ac6e4ddadfa?auto=format&fit=crop&w=1440&q=78" -o public/images/chemistry-molecules.jpg
+          curl -fL --retry 3 "https://images.unsplash.com/photo-1721209697441-9b9d17fdb646?auto=format&fit=crop&w=1600&q=78" -o public/images/nsmq-arena.jpg
       - name: Build web app
         run: npm run build
       - name: Add Android platform
         run: npx cap add android
+      - name: Apply JUASS school crest as Android launcher icon
+        run: |
+          python3 -m pip install --quiet pillow
+          python3 - <<'PY'
+          from PIL import Image, ImageDraw
+          from pathlib import Path
+          src = Image.open("public/juass-crest.png").convert("RGBA")
+          sizes = {"mdpi":48,"hdpi":72,"xhdpi":96,"xxhdpi":144,"xxxhdpi":192}
+          for density, size in sizes.items():
+              canvas = Image.new("RGBA", (size, size), (8, 13, 24, 255))
+              crest = src.copy()
+              crest.thumbnail((int(size*0.72), int(size*0.72)), Image.Resampling.LANCZOS)
+              canvas.alpha_composite(crest, ((size-crest.width)//2, (size-crest.height)//2))
+              out = Path(f"android/app/src/main/res/mipmap-{density}-v4")
+              out.mkdir(parents=True, exist_ok=True)
+              canvas.save(out / "ic_launcher.png", optimize=True)
+              canvas.save(out / "ic_launcher_round.png", optimize=True)
+              foreground = Image.new("RGBA", (size, size), (0,0,0,0))
+              foreground.alpha_composite(crest, ((size-crest.width)//2, (size-crest.height)//2))
+              foreground.save(out / "ic_launcher_foreground.png", optimize=True)
+          for name in ("ic_launcher.xml", "ic_launcher_round.xml"):
+              path = Path("android/app/src/main/res/mipmap-anydpi-v26") / name
+              path.parent.mkdir(parents=True, exist_ok=True)
+              path.write_text('''<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android"><background android:drawable="@color/ic_launcher_background"/><foreground android:drawable="@mipmap/ic_launcher_foreground"/></adaptive-icon>''')
+          PY
       - name: Sync Android project
         run: npx cap sync android
       - name: Build debug APK

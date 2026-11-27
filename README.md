@@ -13,7 +13,7 @@ Local prerequisites: Node.js 22, Java 17 and Android SDK. Run npm install, npm r
 
 
 ## Visual identity
-The in-app crest is linked from the JUASS school website (https://www.juass.online/about.html). Physics and Chemistry use separate science-themed Unsplash images; the Home screen uses an auditorium photograph as an NSMQ-inspired training-arena backdrop. These remote images require an internet connection; the UI falls back to its dark colour theme offline. Pinterest was reviewed for layout inspiration only; Pins are not copied into the app because their copyright/licensing status is not reliably established. Unsplash license: https://unsplash.com/license.
+The in-app crest is linked from the JUASS school website (https://www.juass.online/about.html). Physics and Chemistry use separate science-themed Unsplash images; the Home screen uses an auditorium photograph as an NSMQ-inspired training-arena backdrop. The build workflow downloads and packages these images into the APK so they are available offline. The JUASS crest is also used for the Android launcher icon. Pinterest was reviewed for layout inspiration only; Pins are not copied into the app because their copyright/licensing status is not reliably established. Unsplash license: https://unsplash.com/license.
 
 Image references:
 - Physics atom render: https://unsplash.com/photos/diagram-of-an-atom-with-nucleus-and-orbiting-electrons-OQ6T3OusS6Q
