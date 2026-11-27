@@ -329,6 +329,8 @@ export const NSMQTrainingApp = () => {
   useEffect(() => {
     if (!q || revealed || done) return;
     if (left <= 0) {
+      setHistory(v => [...v, { id: uid(), subject: q.subject, topic: q.topic, ok: false, seconds: Math.max(0, Math.round((Date.now() - started) / 1000)), date: new Date().toISOString() }]);
+      setToast("Time is up. The correct answer is shown below.");
       setRevealed(true);
       return;
     }
