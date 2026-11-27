@@ -237,7 +237,7 @@ export const NSMQTrainingApp = () => {
     [subject, setSubject] = useState("All subjects"),
     [level, setLevel] = useState("All levels"),
     [qty, setQty] = useState(8),
-    [limit, setLimit] = useState(20),
+    [limit, setLimit] = useState(10),
     [style, setStyle] = useState("Team rotation");
   const [speechVoices, setSpeechVoices] = useState<Array<{name:string;lang:string;localService:boolean;engineIndex:number}>>([]), [speechVoice, setSpeechVoice] = useState(-1), [speechRate, setSpeechRate] = useState(1), [speechReady, setSpeechReady] = useState(false);
   const [session, setSession] = useState<Q[]>([]),
@@ -532,10 +532,10 @@ export const NSMQTrainingApp = () => {
               change: (v: string) => setQty(Number(v)),
               opts: ["4", "6", "8", "10", "12", "16"]
             }, {
-              l: "Seconds per question",
-              v: String(limit),
-              change: (v: string) => setLimit(Number(v)),
-              opts: ["10", "15", "20", "30", "45", "60"]
+              l: "Time limit",
+              v: round === "Problem of the Day" ? "4 minutes" : "10 seconds",
+              change: () => setLimit(10),
+              opts: [round === "Problem of the Day" ? "4 minutes" : "10 seconds"]
             }, {
               l: "Session style",
               v: style,
