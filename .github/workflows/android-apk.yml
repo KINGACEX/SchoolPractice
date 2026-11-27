@@ -1,1 +1,38 @@
-name: Android APK\non:\n  workflow_dispatch:\n  push:\n    branches: [juaben-quizforge-android-001]\npermissions:\n  contents: read\njobs:\n  build-apk:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - uses: actions/setup-node@v4\n        with:\n          node-version: 22\n          cache: npm\n      - uses: actions/setup-java@v4\n        with:\n          distribution: temurin\n          java-version: '17'\n      - uses: android-actions/setup-android@v3\n      - name: Install dependencies\n        run: npm install\n      - name: Build web app\n        run: npm run build\n      - name: Add Android platform\n        run: npx cap add android\n      - name: Sync Android project\n        run: npx cap sync android\n      - name: Build debug APK\n        run: cd android && chmod +x gradlew && ./gradlew assembleDebug\n      - name: Upload APK\n        uses: actions/upload-artifact@v4\n        with:\n          name: Juaben-QUIZFORGE-debug-APK\n          path: android/app/build/outputs/apk/debug/app-debug.apk\n          if-no-files-found: error\n
+name: Android APK
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - juaben-quizforge-android-001
+permissions:
+  contents: read
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - name: Install dependencies
+        run: npm install
+      - name: Build web app
+        run: npm run build
+      - name: Add Android platform
+        run: npx cap add android
+      - name: Sync Android project
+        run: npx cap sync android
+      - name: Build debug APK
+        run: cd android && chmod +x gradlew && ./gradlew assembleDebug
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Juaben-QUIZFORGE-debug-APK
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
