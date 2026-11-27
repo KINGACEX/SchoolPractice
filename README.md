@@ -10,3 +10,12 @@ Core data is stored locally on each device. Multi-device live synchronization is
 GitHub Actions runs on pushes to this branch or manually via Actions → Android APK → Run workflow. It builds the web app, adds Capacitor Android, runs Gradle assembleDebug, and uploads the debug APK artifact.
 
 Local prerequisites: Node.js 22, Java 17 and Android SDK. Run npm install, npm run build, npx cap add android, npx cap sync android, then cd android && ./gradlew assembleDebug.
+
+
+## Visual identity
+The in-app crest is linked from the JUASS school website (https://www.juass.online/about.html). Physics and Chemistry use separate science-themed Unsplash images; the Home screen uses an auditorium photograph as an NSMQ-inspired training-arena backdrop. These remote images require an internet connection; the UI falls back to its dark colour theme offline. Pinterest was reviewed for layout inspiration only; Pins are not copied into the app because their copyright/licensing status is not reliably established. Unsplash license: https://unsplash.com/license.
+
+Image references:
+- Physics atom render: https://unsplash.com/photos/diagram-of-an-atom-with-nucleus-and-orbiting-electrons-OQ6T3OusS6Q
+- Chemistry molecular structure: https://unsplash.com/photos/abstract-blue-and-white-organic-molecular-structure-wt23anUaLec
+- NSMQ arena auditorium: https://unsplash.com/photos/an-empty-auditorium-with-red-seats-and-a-projector-screen-9dela-to5c4
